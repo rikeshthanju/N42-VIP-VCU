@@ -13,26 +13,20 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.n42.auth.AuthPrimaryButton
-import com.example.n42.auth.AuthTextField
-import com.example.n42.auth.AuthTheme
-import com.example.n42.auth.AuthType
-import com.example.n42.auth.SupportingType
-import com.example.n42.auth.isValidEmail
 
 /**
- * Forgot Password screen. There is no final Figma frame yet ("Prenatal 5" is empty),
- * so this follows the shared Prenatal auth styling. No email is actually sent.
+ * Forgot Password screen. The Figma file has no final Forgot Password frame yet, so this
+ * follows the shared NT & NT+ auth styling (frames NT 2 and NT 3). No email is actually sent.
  */
 @Composable
 fun ForgotPasswordScreen(
-    onBackToLogin: () -> Unit = {}, // placeholder: navigate to Login once it exists
+    onBackToLogin: () -> Unit = {}, // goes to the Login placeholder until the real Login screen is integrated
 ) {
     var email by remember { mutableStateOf("") }
     var submitted by remember { mutableStateOf(false) }
     var linkSent by remember { mutableStateOf(false) }
 
-    val emailError = submitted && !isValidEmail(email)
+    val emailMessage = if (submitted) emailProblem(email) else null
 
     Column(
         modifier = Modifier
@@ -62,21 +56,21 @@ fun ForgotPasswordScreen(
                 placeholder = "Enter your email",
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Done,
-                isError = emailError,
+                isError = emailMessage != null,
                 supportingText = when {
-                    emailError -> "Enter a valid email address"
+                    emailMessage != null -> emailMessage
                     linkSent -> "Reset link sent. Please check your email."
                     else -> null
                 },
                 supportingType = when {
-                    emailError -> SupportingType.Error
+                    emailMessage != null -> SupportingType.Error
                     linkSent -> SupportingType.Success
                     else -> SupportingType.Default
                 },
             )
 
             Spacer(Modifier.height(32.dp))
-            AuthPrimaryButton("Send Reset Link", onClick = {
+            AuthPrimaryButton("Send Reset Link", ready = isValidEmail(email), onClick = {
                 submitted = true
                 linkSent = isValidEmail(email) // simulated only
             })

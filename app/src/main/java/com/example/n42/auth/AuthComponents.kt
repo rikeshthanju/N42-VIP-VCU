@@ -1,7 +1,6 @@
 package com.example.n42.auth
 
-import com.example.n42.R
-import android.util.Patterns
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,9 +33,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.n42.R
 
 /**
- * Gabarito is the font used across the Prenatal designs.
+ * Gabarito is the font used across the NT & NT+ designs.
  * Download it from Google Fonts and add these files to app/src/main/res/font/:
  *   gabarito_regular.ttf, gabarito_medium.ttf, gabarito_bold.ttf
  */
@@ -46,29 +46,44 @@ val Gabarito = FontFamily(
     Font(R.font.gabarito_bold, FontWeight.Bold),
 )
 
-/** Tokens taken from the Prenatal frames and "Prenatal Palette" in the Figma file. */
+/** Tokens taken from the NT & NT+ frames (NT 1 to NT 3) and the "NT & NT+ Palette" in the Figma file. */
 object AuthTheme {
-    // Prenatal palette
-    val Background = Color(0xFFF4E4E8)   // screen background
-    val Primary = Color(0xFFD9A2B6)      // buttons, links, focus
-    val PlumDark = Color(0xFF713B50)     // palette accent (not used on auth screens yet)
+    // NT & NT+ palette: the only colors used in the app. Names describe the swatch.
+    private val Rose = Color(0xFFB9707A)       // B9707A
+    private val RoseDeep = Color(0xFF97404C)   // deep rose swatch (unlabeled in Figma, Rectangle 9)
+    private val Blush = Color(0xFFF7E4E6)      // F7E4E6
+    private val Cream = Color(0xFFF7F0EA)      // F7F0EA
+    private val Ivory = Color(0xFFFFFBF6)      // FFFBF6
+    private val Cocoa = Color(0xFF3B2E2A)      // 3B2E2A
+    private val Taupe = Color(0xFF9C8A7E)      // 9C8A7E
+    private val Rust = Color(0xFFB3492F)       // B3492F
+    // D9A441 (gold) is in the palette but not used on the auth screens
+
+    val Background = Cream                     // screen background
+    val Primary = Rose                         // button, links, focus border
+    val PrimaryDeep = RoseDeep
+
+    val ButtonDefault = Primary                // resting button color
+    val ButtonReady = PrimaryDeep              // button color once the form is valid
+    val OnPrimary = Ivory                      // button text
 
     // Text
-    val Title = Color(0xFF1E293B)
-    val Label = Color(0xFF1E293B)
-    val Body = Color(0xFF475569)
-    val InputText = Color(0xFF334155)
-    val Placeholder = Color(0xFF94A3B8)
-    val Supporting = Color(0xFF64748B)
+    val Title = Cocoa
+    val Label = Cocoa
+    val Body = Cocoa                           // terms text
+    val InputText = Cocoa
+    val Placeholder = Taupe
+    val Supporting = Taupe                     // helper text under a field
+    val Icon = Cocoa                           // password eye icon
 
     // Input
-    val InputFill = Color.White
-    val InputBorder = Color(0xFFE2E8F0)
-    val InputBorderPassword = Color(0xFF94A3B8)
+    val InputFill = Ivory
+    val InputBorder = Blush
+    val InputBorderPassword = Taupe
 
     // Status
-    val Error = Color(0xFFD12E34)
-    val Success = Color(0xFF317D35)
+    val Error = Rust
+    val Success = Cocoa                        // palette has no green, so the confirmation uses dark text
 
     // Layout (dp)
     val ContentMaxWidth = 358.dp
@@ -79,7 +94,6 @@ object AuthTheme {
     val InputRadius = 8.dp
     val InputBorderWidth = 1.5.dp
     val ButtonHeight = 44.dp
-    val ButtonRadius = 6.dp
     val IconSize = 20.dp
 }
 
@@ -169,7 +183,7 @@ fun AuthTextField(
                         Icon(
                             imageVector = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
                             contentDescription = if (passwordVisible) "Hide password" else "Show password",
-                            tint = AuthTheme.Placeholder,
+                            tint = AuthTheme.Icon,
                             modifier = Modifier
                                 .size(AuthTheme.IconSize)
                                 .clickable { passwordVisible = !passwordVisible },
@@ -196,11 +210,20 @@ fun AuthTextField(
 }
 
 @Composable
-fun AuthPrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun AuthPrimaryButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    ready: Boolean = false,
+) {
+    val container by animateColorAsState(
+        targetValue = if (ready) AuthTheme.ButtonReady else AuthTheme.ButtonDefault,
+        label = "buttonColor",
+    )
     Button(
         onClick = onClick,
-        shape = RoundedCornerShape(AuthTheme.ButtonRadius),
-        colors = ButtonDefaults.buttonColors(containerColor = AuthTheme.Primary, contentColor = Color.White),
+        shape = RoundedCornerShape(percent = 50), // pill shape, as in the NT frames
+        colors = ButtonDefaults.buttonColors(containerColor = container, contentColor = AuthTheme.OnPrimary),
         elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
         modifier = modifier.fillMaxWidth().height(AuthTheme.ButtonHeight),
@@ -209,5 +232,24 @@ fun AuthPrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Mo
     }
 }
 
-fun isValidEmail(email: String): Boolean =
-    Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()
+private val EMAIL_REGEX =
+    Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}$")
+
+private val DOMAIN_TYPOS = mapOf(
+    "gail.com" to "gmail.com", "gmial.com" to "gmail.com", "gmal.com" to "gmail.com",
+    "gmai.com" to "gmail.com", "gmil.com" to "gmail.com", "gamil.com" to "gmail.com",
+    "gnail.com" to "gmail.com", "gmail.co" to "gmail.com", "gmail.con" to "gmail.com",
+    "yaho.com" to "yahoo.com", "yahoo.con" to "yahoo.com", "hotmial.com" to "hotmail.com",
+    "hotmal.com" to "hotmail.com", "outlok.com" to "outlook.com", "iclod.com" to "icloud.com",
+)
+
+/** Returns an error message, or null if the email looks OK. */
+fun emailProblem(email: String): String? {
+    val e = email.trim()
+    if (!EMAIL_REGEX.matches(e)) return "Enter a valid email address"
+    val suggestion = DOMAIN_TYPOS[e.substringAfter('@').lowercase()]
+    if (suggestion != null) return "Did you mean ${e.substringBefore('@')}@$suggestion?"
+    return null
+}
+
+fun isValidEmail(email: String): Boolean = emailProblem(email) == null

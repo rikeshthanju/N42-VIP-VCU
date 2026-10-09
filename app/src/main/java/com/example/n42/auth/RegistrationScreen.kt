@@ -8,20 +8,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.n42.auth.AuthPrimaryButton
-import com.example.n42.auth.AuthTextField
-import com.example.n42.auth.AuthTheme
-import com.example.n42.auth.AuthType
-import com.example.n42.auth.isValidEmail
 
-/** Prenatal "Register" screen (Figma frame "Prenatal 3"). No real account creation. */
+/** NT & NT+ "Register" screen (Figma frame "NT 3"). No real account creation. */
 @Composable
 fun RegistrationScreen(
-    onAccountCreated: () -> Unit = {}, // placeholder: navigate onward once the next screen exists
+    onAccountCreated: () -> Unit = {}, // placeholder: no real account is created
 ) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
@@ -32,9 +31,11 @@ fun RegistrationScreen(
 
     val firstError = submitted && firstName.isBlank()
     val lastError = submitted && lastName.isBlank()
-    val emailError = submitted && !isValidEmail(email)
+    val emailMessage = if (submitted) emailProblem(email) else null
     val passError = submitted && password.length < 8
     val confirmError = submitted && confirm != password
+    val formReady = firstName.isNotBlank() && lastName.isNotBlank() && isValidEmail(email) &&
+            password.length >= 8 && confirm == password
 
     Column(
         modifier = Modifier
@@ -65,49 +66,42 @@ fun RegistrationScreen(
                     )
                 }
                 AuthTextField(
-                    label = "E-mail",
-                    value = email,
-                    onValueChange = { email = it },
-                    placeholder = "Enter your email",
-                    keyboardType = KeyboardType.Email,
-                    isError = emailError,
-                    supportingText = if (emailError) "Enter a valid email address" else null,
+                    label = "E-mail", value = email, onValueChange = { email = it },
+                    placeholder = "Enter your email", keyboardType = KeyboardType.Email,
+                    isError = emailMessage != null, supportingText = emailMessage,
                 )
                 AuthTextField(
-                    label = "Password",
-                    value = password,
-                    onValueChange = { password = it },
-                    placeholder = "*********",
-                    keyboardType = KeyboardType.Password,
-                    isPassword = true,
-                    isError = passError,
-                    supportingText = "must contain 8 characters.",
+                    label = "Password", value = password, onValueChange = { password = it },
+                    placeholder = "*********", keyboardType = KeyboardType.Password, isPassword = true,
+                    isError = passError, supportingText = "must contain 8 char.",
                 )
                 AuthTextField(
-                    label = "Confirm Password",
-                    value = confirm,
-                    onValueChange = { confirm = it },
-                    placeholder = "*********",
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done,
-                    isPassword = true,
-                    isError = confirmError,
-                    supportingText = if (confirmError) "Passwords do not match." else null,
+                    label = "Confirm Password", value = confirm, onValueChange = { confirm = it },
+                    placeholder = "*********", keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done, isPassword = true,
+                    isError = confirmError, supportingText = if (confirmError) "Passwords do not match." else null,
                 )
             }
 
             Spacer(Modifier.height(81.dp))
 
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                AuthPrimaryButton("Create Account", onClick = {
+                AuthPrimaryButton("Create Account", ready = formReady, onClick = {
                     submitted = true
-                    val ok =
-                        firstName.isNotBlank() && lastName.isNotBlank() && isValidEmail(email) &&
-                                password.length >= 8 && confirm == password
-                    if (ok) onAccountCreated()
+                    if (formReady) onAccountCreated()
                 })
                 Text(
-                    "By continuing, you agree to our Terms of Service and Privacy Policy.",
+                    text = buildAnnotatedString {
+                        append("By continuing, you agree to our ")
+                        withStyle(SpanStyle(color = AuthTheme.Primary, textDecoration = TextDecoration.Underline)) {
+                            append("Terms of Service")
+                        }
+                        append(" and ")
+                        withStyle(SpanStyle(color = AuthTheme.Primary, textDecoration = TextDecoration.Underline)) {
+                            append("Privacy Policy")
+                        }
+                        append(".")
+                    },
                     style = AuthType.Body,
                     modifier = Modifier.fillMaxWidth(),
                 )
