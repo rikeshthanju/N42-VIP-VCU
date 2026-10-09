@@ -44,3 +44,4 @@ replay_pid*
 local.properties
  341b6fe (Initial project setup and README)
  !gradle/wrapper/gradle-wrapper.jar
+ .idea/
