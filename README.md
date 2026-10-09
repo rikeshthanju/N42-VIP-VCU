@@ -5,29 +5,33 @@ Jetpack Compose screens for the NT42+ Android app.
 ## Screens
 - **RegistrationScreen**: first/last name, email, password, confirm password (with visibility toggles), Create Account button, terms and privacy text.
 - **ForgotPasswordScreen**: email field, Send Reset Link button, simulated confirmation message, Back to Login.
+- **LoginPlaceholderScreen**: a clearly labelled placeholder so "Back to Login" has a destination. The real Login screen is integrated separately; delete this stub then.
 
-No backend, account creation or email sending is implemented. Login navigation is a placeholder callback.
+No backend, account creation or email sending is implemented.
 
-## Files
-- `AuthComponents.kt`: shared tokens (`AuthTheme`), `AuthTextField`, `AuthPrimaryButton`
+## Navigation (temporary)
+`MainActivity` uses a small state-based switch: Register, then Login (placeholder), then Forgot Password, and back. There is no test-only switch button. Replace this with real navigation when the Login screen is integrated.
+
+## Files (`app/src/main/java/com/example/n42/auth/`)
+- `AuthComponents.kt`: shared tokens (`AuthTheme`, `AuthType`), `AuthTextField`, `AuthPrimaryButton`, email validation
 - `RegistrationScreen.kt`
 - `ForgotPasswordScreen.kt`
+- `LoginPlaceholderScreen.kt`
 
 ## Styling
-Colors, spacing, radii and type come from the Prenatal frames and "Prenatal Palette" in the Figma file (background `#F4E4E8`, primary `#D9A2B6`, Gabarito font). They live in `AuthTheme` and `AuthType` in `AuthComponents.kt`.
+Styling is based on the **NT & NT+** frames (NT 1 to NT 3) and the "NT & NT+ Palette" in the Figma file:
+only colors from the "NT & NT+ Palette" are used.
 
-The Forgot Password screen has no final design yet (Figma "Prenatal 5" is empty), so it uses the shared auth styling.
+Gabarito font. Tokens live in `AuthTheme` and `AuthType` in `AuthComponents.kt`.
+
+The Figma file has no final Forgot Password frame yet, so that screen uses the shared auth styling until the design is confirmed.
 
 ### Font setup
-Download **Gabarito** from Google Fonts and add `gabarito_regular.ttf`, `gabarito_medium.ttf` and `gabarito_bold.ttf` to `app/src/main/res/font/`.
+The Gabarito files (`gabarito_regular.ttf`, `gabarito_medium.ttf`, `gabarito_bold.ttf`) are in `app/src/main/res/font/`.
 
-## Dependencies (app/build.gradle.kts)
-```kotlin
-implementation(platform("androidx.compose:compose-bom:2024.09.00"))
-implementation("androidx.compose.material3:material3")
-implementation("androidx.compose.material:material-icons-extended")
-implementation("androidx.compose.ui:ui-tooling-preview")
+## Build
+Open the project in Android Studio and run the `app` configuration. The Gradle wrapper (`gradlew`, `gradlew.bat`, `gradle/wrapper/gradle-wrapper.jar` and `.properties`) is committed, so a fresh clone builds without extra setup:
+
 ```
-
-## Run
-Open in Android Studio, then run the `app` configuration on an emulator. Use the `@Preview` functions to view each screen.
+./gradlew assembleDebug
+```
