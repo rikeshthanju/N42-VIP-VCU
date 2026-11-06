@@ -6,6 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.material3.TextButton
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
@@ -16,10 +17,12 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.clickable
 
 /** NT & NT+ "Register" screen (Figma frame "NT 3"). No real account creation. */
 @Composable
 fun RegistrationScreen(
+    onBackClick: () -> Unit = {},
     onAccountCreated: () -> Unit = {}, // placeholder: no real account is created
 ) {
     var firstName by remember { mutableStateOf("") }
@@ -48,7 +51,12 @@ fun RegistrationScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Column(Modifier.widthIn(max = AuthTheme.ContentMaxWidth).fillMaxWidth()) {
-            Spacer(Modifier.height(96.dp))
+            Text(
+                "← Back",
+                style = AuthType.Link,
+                modifier = Modifier.clickable(onClick = onBackClick).padding(vertical = 12.dp),
+            )
+            Spacer(Modifier.height(48.dp))
             Text("Register", style = AuthType.Title, modifier = Modifier.fillMaxWidth())
             Spacer(Modifier.height(49.dp))
 
@@ -73,7 +81,7 @@ fun RegistrationScreen(
                 AuthTextField(
                     label = "Password", value = password, onValueChange = { password = it },
                     placeholder = "*********", keyboardType = KeyboardType.Password, isPassword = true,
-                    isError = passError, supportingText = "must contain 8 char.",
+                    isError = passError, supportingText = "must contain 8 characters.",
                 )
                 AuthTextField(
                     label = "Confirm Password", value = confirm, onValueChange = { confirm = it },
