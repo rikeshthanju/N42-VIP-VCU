@@ -1,37 +1,47 @@
-# NT42+ Auth Screens (Registration and Forgot Password)
+# NT42+ Android App
 
-Jetpack Compose screens for the NT42+ Android app.
+The Android app for the NT42+ study, built with Kotlin and Jetpack Compose. The design follows our NT Figma file.
 
-## Screens
-- **RegistrationScreen**: first/last name, email, password, confirm password (with visibility toggles), Create Account button, terms and privacy text.
-- **ForgotPasswordScreen**: email field, Send Reset Link button, simulated confirmation message, Back to Login.
-- **LoginPlaceholderScreen**: a clearly labelled placeholder so "Back to Login" has a destination. The real Login screen is integrated separately; delete this stub then.
+## What you can do in the app
 
-No backend, account creation or email sending is implemented.
+- **Welcome and Login:** the first screens. (Built by a teammate.)
+- **Register and Forgot Password:** create an account or reset a password.
+- **Reminders:** a list of study reminders like weekly check-ins, cooking classes and appointments. Tap one to see the details.
+- **Tips:** a list of recipes, cooking tips, grocery tips and learning content. Tap a card to read more. Recipes show ingredients and steps.
+- **Light and Dark:** Reminders and Tips follow your phone's theme.
 
-## Navigation (temporary)
-`MainActivity` uses a small state-based switch: Register, then Login (placeholder), then Forgot Password, and back. There is no test-only switch button. Replace this with real navigation when the Login screen is integrated.
+Profile, Chat and Trivia show "Coming soon" for now. Other teammate is building them.
 
-## Files (`app/src/main/java/com/example/n42/auth/`)
-- `AuthComponents.kt`: shared tokens (`AuthTheme`, `AuthType`), `AuthTextField`, `AuthPrimaryButton`, email validation
-- `RegistrationScreen.kt`
-- `ForgotPasswordScreen.kt`
-- `LoginPlaceholderScreen.kt`
+> Everything is sample data for now. Login, Register and Forgot Password aren't connected to a server yet.
 
-## Styling
-Styling is based on the **NT & NT+** frames (NT 1 to NT 3) and the "NT & NT+ Palette" in the Figma file:
-only colors from the "NT & NT+ Palette" are used.
-
-Gabarito font. Tokens live in `AuthTheme` and `AuthType` in `AuthComponents.kt`.
-
-The Figma file has no final Forgot Password frame yet, so that screen uses the shared auth styling until the design is confirmed.
-
-### Font setup
-The Gabarito files (`gabarito_regular.ttf`, `gabarito_medium.ttf`, `gabarito_bold.ttf`) are in `app/src/main/res/font/`.
-
-## Build
-Open the project in Android Studio and run the `app` configuration. The Gradle wrapper (`gradlew`, `gradlew.bat`, `gradle/wrapper/gradle-wrapper.jar` and `.properties`) is committed, so a fresh clone builds without extra setup:
+## Where things are
 
 ```
-./gradlew assembleDebug
+app/src/main/java/com/example/n42/
+├─ MainActivity.kt    starts the app and moves between screens
+├─ auth/              Register and Forgot Password
+├─ login/             Welcome and Login (teammate's code)
+└─ study/             Reminders and Tips
+    ├─ StudyData.kt       the sample data
+    ├─ StudyColors.kt     Light and Dark colors
+    └─ StudyScreens.kt    all the Reminders and Tips screens
 ```
+
+## Adding a backend later
+The screens get their data from two functions in `StudyData.kt`: `getReminders()` and `getTips()`. When we have a server, only those two functions need to change.
+
+## About the teammate's login code
+We kept it as he wrote it. The few changes we made are marked with `ADDED`, `CHANGED` or `REMOVED` comments in `login/WelcomeLoginScreens.kt`. They connect his screens to Register, Forgot Password and Home.
+
+## Try it
+1. Open the project in Android Studio and wait for Gradle to finish.
+2. Run it on an emulator or phone.
+3. Go Welcome → Login → enter any email and password → Home.
+4. Switch your phone to Dark theme to see both looks.
+
+## To do
+- Add the Inter font from the Figma (the app uses the default font for now).
+- Remove the "Back to Welcome (test only)" link at the top of Home before the final PR.
+- Connect Login, Register and the data to a real backend.
+- Confirm the Dark colors with the PM, since the Figma doesn't have a dark design.
+
